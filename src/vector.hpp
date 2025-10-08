@@ -52,7 +52,7 @@ namespace ASC_bla
 
 
   template <typename T>
-  Vector<T> operator++ (const Vector<T> & a, const Vector<T> & b)
+  Vector<T> operator+++ (const Vector<T> & a, const Vector<T> & b)
   {
     Vector<T> sum(a.Size());
     for (size_t i = 0; i < a.Size(); i++)
