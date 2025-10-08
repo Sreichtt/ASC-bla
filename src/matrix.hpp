@@ -34,3 +34,5 @@ namespace ASC_bla
             ~Matrix () {delete [] data; }
     }
 }
+
+#endif
