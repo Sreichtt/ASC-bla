@@ -52,7 +52,7 @@ namespace ASC_bla
 
 
   template <typename T>
-  Vector<T> operator+ (const Vector<T> & a, const Vector<T> & b)
+  Vector<T> operator++ (const Vector<T> & a, const Vector<T> & b)
   {
     Vector<T> sum(a.Size());
     for (size_t i = 0; i < a.Size(); i++)
@@ -64,7 +64,7 @@ namespace ASC_bla
   std::ostream & operator<< (std::ostream & ost, const Vector<T> & v)
   {
     if (v.Size() > 0)
-      ost << v(0);
+      ost << v(0); //help 
     for (size_t i = 1; i < v.Size(); i++)
       ost << ", " << v(i);
     return ost;
