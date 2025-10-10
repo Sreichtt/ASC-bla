@@ -2,7 +2,6 @@
 #define FILE_MATRIX
 
 #include <iostream>
-
 namespace ASC_bla
 {
 
@@ -32,6 +31,13 @@ namespace ASC_bla
             }
 
             ~Matrix () {delete [] data; }
+            
+            size_t Width() const {return width;}
+            size_t Height() const {return height;}
+
+        
+
     }
+    
 }
 #endif
