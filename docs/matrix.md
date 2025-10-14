@@ -19,6 +19,8 @@ int main() {
     std::cout << "Matrix C = " << C << std::endl;
 }
 
+```
+
 ## Matrix-Vektor-Multiplikation
 
 Um Matrizen mit Vektoren einer passenden Länge multiplizieren zu können, überladen wir den Operator `*` mit den passenden Inputs wiefolgt:
