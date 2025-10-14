@@ -8,8 +8,8 @@
 namespace ASC_bla
 {
 
-    enum ORDERING { Zeilenweise, Spaltenweise };
-    template <typename T, ORDERING ORD = Zeilenweise>
+    enum ORDERING { RowMajor, ColMajor };
+    template <typename T, ORDERING ORD = RowMajor>
     class Matrix
     {
         size_t width;
@@ -18,7 +18,7 @@ namespace ASC_bla
 
         size_t index(size_t i, size_t j) const
         {
-            if(ORD == Zeilenweise)
+            if(ORD == RowMajor)
             {
                 return data[i*width + j]
             } else
