@@ -111,12 +111,12 @@ namespace ASC_bla
 
     template <typename T, ORDERING ORD, typename VecT>
     auto operator*(const Matrix<T,ORD>& A, const Vector<VecT>& x) {
-        assert(x.size() == A.Width());
-        Vector<decltype(T{} * VecT{})> y(A.Height(), decltype(T{} * VecT{}){});
+        assert(x.Size() == A.Width());
+        Vector<decltype(T{} * VecT{})> y(A.Height());
 
         for (size_t i = 0; i < A.Height(); ++i)
             for (size_t j = 0; j < A.Width(); ++j)
-                y[i] += A(i, j) * x[j];
+                y(i) += A(i, j) * x(j);
         
         return y;
     }
