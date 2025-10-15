@@ -1,6 +1,6 @@
 # Matrix-Klasse
 
-Die `Matrix`-Klasse von ASC-bla beinhaltet einige, wichtige Matrixoperationen der linearen Algebra wie etwa Addition, Multiplikation oder Transposition.
+Die `Matrix`-Klasse von ASC-bla beinhaltet einige wichtige Matrixoperationen der linearen Algebra wie etwa Addition, Matrix-Vektor-Multiplikation, Matrixmultiplikation oder Transposition.
 
 ## Beispiel
 
