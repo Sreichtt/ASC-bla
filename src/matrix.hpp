@@ -20,10 +20,10 @@ namespace ASC_bla
         {
             if(ORD == RowMajor)
             {
-                return data[i*width + j];
+                return i*width + j;
             } else
             {
-                return data[j*height + i];
+                return j*height + i;
             }
         }
 
@@ -69,6 +69,15 @@ namespace ASC_bla
             size_t Height() const {return height;}            
             T& operator()(size_t i, size_t j) {return data[index(i,j)];}
             const T& operator()(size_t i, size_t j) const {return data[index(i,j)];}
+
+            void setT(size_t i, size_t j, T d){
+                if (ORD == RowMajor){
+                    data[i* width + j] = d;
+                }
+                else{
+                    data[j*height + i] = d; 
+                }
+            }
 
     };
 
