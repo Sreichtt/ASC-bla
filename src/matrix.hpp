@@ -2,26 +2,41 @@
 #define FILE_MATRIX
 
 #include <iostream>
+#include <cassert>
+#include "vector.hpp"
 
 namespace ASC_bla
 {
 
-    template <typename T>
+    enum ORDERING { Zeilenweise, Spaltenweise };
+    template <typename T, ORDERING ORD = Zeilenweise>
     class Matrix
     {
         size_t width;
         size_t height;
         T * data;
 
+        size_t index(size_t i, size_t j) const
+        {
+            if(ORD == Zeilenweise)
+            {
+                return data[i*width + j];
+            } else
+            {
+                return data[j*height + i];
+            }
+        }
+
         public: 
-            Matrix (size_t _height, size_t _width)
+            Matrix (size_t _height = 0, size_t _width = 0)
                 : height(_height), width(_width), data(new T[height*width]) { ; }
 
-            Matrix(const Matrix &m)
+            Matrix(const Matrix& m)
                 : Matrix(m.height, m.width)
-            {
-                *this = m;
-            }
+                {
+                    for (size_t i = 0; i < height * width; ++i)
+                        data[i] = m.data[i];
+                }
 
             Matrix(Matrix && m)
                 : width(0), height(0), data(nullptr)
@@ -42,32 +57,36 @@ namespace ASC_bla
 
             Matrix & operator= (Matrix && m2)
             {
+                assert(width == m2.width);
+                assert(height == m2.height);
                 std::swap(width, m2.width);
                 std::swap(height, m2.height);
                 std::swap(data, m2.data);
                 return *this;
             }
-    
-            size_t Width() const { return width; }
-            size_t Height() const { return height; }
-            T & operator()(size_t i) {return data[i]; }
-            const T & operator()(size_t i) const { return data[i]; }
-            T & operator()(size_t i, size_t j) { return data[i + j * width]; }
-            const T & operator()(size_t i, size_t j) const { return data[i + j * width]; }
+            
+            size_t Width() const {return width;}
+            size_t Height() const {return height;}            
+            T& operator()(size_t i, size_t j) {return data[index(i,j)];}
+            const T& operator()(size_t i, size_t j) const {return data[index(i,j)];}
+
     };
 
-    template <typename T>
-    Matrix<T> operator+ (const Matrix<T> & a, const Matrix<T> & b)
+    template <typename T, ORDERING ORD>
+    Matrix<T, ORD> operator+(const Matrix<T, ORD>& a, const Matrix<T, ORD>& b)
     {
-        Matrix<T> sum(a.Width(), a.Height());
-        for (size_t i = 0; i < a.height*a.width(); i++)
-            sum(i) = a(i)+b(i);
-        return sum;
-    }
-  
+        assert(a.Width() == b.Width() && a.Height() == b.Height());
 
-    template <typename T>
-    std::ostream & operator<<(std::ostream & ost, const Matrix<T> & m)
+        Matrix<T, ORD> sum(a.Height(), a.Width());
+        for (size_t i = 0; i < a.Height(); ++i)
+            for (size_t j = 0; j < a.Width(); ++j)
+                sum(i, j) = a(i, j) + b(i, j);
+
+        return sum;
+    }   
+
+    template <typename T, ORDERING ORD>
+    std::ostream& operator<<(std::ostream& ost, const Matrix<T, ORD>& m)
     {
         for (size_t i = 0; i < m.Height(); ++i)
         {
@@ -80,5 +99,23 @@ namespace ASC_bla
         }
         return ost;
     }
+
+    template <typename T, ORDERING ORD, typename VecT>
+    auto operator*(const Matrix<T,ORD>& A, const Vector<VecT>& x) {
+        assert(x.size() == A.Width());
+        Vector<decltype(T{} * VecT{})> y(A.Height(), decltype(T{} * VecT{}){});
+
+        for (size_t i = 0; i < A.Height(); ++i)
+            for (size_t j = 0; j < A.Width(); ++j)
+                y[i] += A(i, j) * x[j];
+        
+        return y;
+    }
+
 }
 #endif
+
+
+
+
+
