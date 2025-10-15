@@ -20,10 +20,10 @@ namespace ASC_bla
         {
             if(ORD == RowMajor)
             {
-                return data[i*width + j];
+                return i*width + j;
             } else
             {
-                return data[j*height + i];
+                return j*height + i;
             }
         }
 
