@@ -20,10 +20,10 @@ namespace ASC_bla
         {
             if(ORD == RowMajor)
             {
-                return data[i*width + j]
+                return data[i*width + j];
             } else
             {
-                return data[j*height + i]
+                return data[j*height + i];
             }
         }
 
@@ -47,23 +47,66 @@ namespace ASC_bla
             }
 
             ~Matrix () {delete [] data; }
+
+            Matrix & operator=(const Matrix & m2)
+            {
+                for (size_t i = 0; i < width * height; i++)
+                data[i] = m2.data[i];
+                return *this;
+            }
+
+            Matrix & operator= (Matrix && m2)
+            {
+                assert(width == m2.width);
+                assert(height == m2.height);
+                std::swap(width, m2.width);
+                std::swap(height, m2.height);
+                std::swap(data, m2.data);
+                return *this;
+            }
             
             size_t Width() const {return width;}
-            size_t Height() const {return height;}
-            
-            & operator()(size_t i, size_t j) {return data[index(i,j)];}
+            size_t Height() const {return height;}            
+            T& operator()(size_t i, size_t j) {return data[index(i,j)];}
             const T& operator()(size_t i, size_t j) const {return data[index(i,j)];}
 
     };
 
-    template <typename T, ORDERING ORD, typename VecT>
+    template <typename T, ORDERING ORD>
+    Matrix<T, ORD> operator+(const Matrix<T, ORD>& a, const Matrix<T, ORD>& b)
+    {
+        assert(a.Width() == b.Width() && a.Height() == b.Height());
 
-    auto operator*(const Matrix<T,ORD>& A, const Vector<VecT>& x) const {
+        Matrix<T, ORD> sum(a.Height(), a.Width());
+        for (size_t i = 0; i < a.Height(); ++i)
+            for (size_t j = 0; j < a.Width(); ++j)
+                sum(i, j) = a(i, j) + b(i, j);
+
+        return sum;
+    }   
+
+    template <typename T, ORDERING ORD>
+    std::ostream& operator<<(std::ostream& ost, const Matrix<T, ORD>& m)
+    {
+        for (size_t i = 0; i < m.Height(); ++i)
+        {
+            for (size_t j = 0; j < m.Width(); ++j)
+            {
+                ost << m(i, j);
+                if (j + 1 < m.Width()) ost << ", ";
+            }
+            ost << '\n';
+        }
+        return ost;
+    }
+
+    template <typename T, ORDERING ORD, typename VecT>
+    auto operator*(const Matrix<T,ORD>& A, const Vector<VecT>& x) {
         assert(x.size() == A.Width());
         Vector<decltype(T{} * VecT{})> y(A.Height(), decltype(T{} * VecT{}){});
 
-        for (size_t i = 0; i < A.Height; ++i)
-            for (size_t j = 0; j < A.Width; ++j)
+        for (size_t i = 0; i < A.Height(); ++i)
+            for (size_t j = 0; j < A.Width(); ++j)
                 y[i] += A(i, j) * x[j];
         
         return y;
@@ -71,3 +114,8 @@ namespace ASC_bla
 
 }
 #endif
+
+
+
+
+
