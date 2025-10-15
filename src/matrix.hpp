@@ -70,6 +70,15 @@ namespace ASC_bla
             T& operator()(size_t i, size_t j) {return data[index(i,j)];}
             const T& operator()(size_t i, size_t j) const {return data[index(i,j)];}
 
+            void setT(size_t i, size_t j, T d){
+                if (ORD == RowMajor){
+                    data[i* width + j] = d;
+                }
+                else{
+                    data[j*height + i] = d; 
+                }
+            }
+
     };
 
     template <typename T, ORDERING ORD>
