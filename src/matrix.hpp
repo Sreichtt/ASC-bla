@@ -4,11 +4,94 @@
 #include <iostream>
 #include <cassert>
 #include "vector.hpp"
+#include "matrixexpr.hpp"
 
 namespace ASC_bla
 {
-
     enum ORDERING { RowMajor, ColMajor };
+    template <typename T, ORDERING ORD = RowMajor, typename TDIST = std::integral_constant<size_t,1>>
+    class MatrixView: public MatrixExpr<MatrixView<T,TDIST>> 
+    {
+        protected:
+        size_t m_width;
+        size_t m_height;
+        T* m_data;
+        TDIST m_dist;
+
+        public:
+        MatrixView() = default;
+        MatrixView(const MatrixView&) = default;
+
+        template <typename TDIST2>
+        MatrixView (const MatrixView<T,TDIST2> & m2)
+            : m_data(m2.data()), m_width(m2.width()), m_height(m2.height()), m_dist(m2.dist()) { }
+
+        MatrixView (size_t height, size_t width, T* data)
+            : m_data(data), m_height(height), m_width(width) { }
+        
+        MatrixView (size_t height, size_t width, TDIST dist, T* data)
+            : m_data(data), m_height(height), m_width(width), m_dist(dist) { }
+
+        template <typename TB>
+        MatrixView & operator= (const MatrixExpr<TB> & m2) {
+            assert(m_height == m2.height() && m_width == m2.width());
+            if(ORD == ColMajor) {
+                for(size_t i = 0; i<m_height; i++){
+                    for(size_t j = 0; j<m_width; j++){
+                        m_data[i + j*m_dist] = m2(i,j);
+                    }
+                }
+            }
+            else{
+                for(size_t i = 0; i<m_height; i++){
+                    for(size_t j = 0; j<m_width; j++){
+                        m_data[i*m_dist + j] = m2(i,j);
+                    }
+                }
+            }
+            return *this;      
+        }
+
+        MatrixView & operator= (T scal)
+        {
+            if(ORD == ColMajor) {
+                for(size_t i = 0; i<m_height; i++){
+                    for(size_t j = 0; j<m_width; j++){
+                        m_data[i + j*m_dist] = scal;
+                    }
+                }
+            }
+            else{
+                for(size_t i = 0; i<m_height; i++){
+                    for(size_t j = 0; j<m_width; j++){
+                        m_data[i*m_dist + j] = scal;
+                    }
+                }
+            }
+            return *this;
+        }
+
+        T * data() const {return m_data; }
+        size_t Height() const {return m_height; }
+        size_t Width() const {return m_width; }
+        auto dist() const {return m_dist; }
+
+        T & operator() (size_t i, size_t j){
+            if(ORD == ColMajor) 
+                return m_data[i + j*m_dist];
+            else 
+                return m_data[i*m_dist + j];
+        }
+
+        constexpr auto row(size_t i) {
+            if constexpr(ORD == RowMajor){
+                return VectorView<T>(m_width, m_data + i * m_width);
+            }
+            else {
+                return VectorView<T>(m_width, )
+            }
+        }
+    };
     template <typename T, ORDERING ORD = RowMajor>
     class Matrix
     {
