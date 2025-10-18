@@ -377,6 +377,7 @@ document.write(`
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#beispiel">Beispiel</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matrix-vektor-multiplikation">Matrix-Vektor-Multiplikation</a></li>
 </ul>
             </nav>
         </div>
@@ -390,7 +391,7 @@ document.write(`
                   
   <section class="tex2jax_ignore mathjax_ignore" id="matrix-klasse">
 <h1>Matrix-Klasse<a class="headerlink" href="#matrix-klasse" title="Link to this heading">#</a></h1>
-<p>Die <code class="docutils literal notranslate"><span class="pre">Matrix</span></code>-Klasse von ASC-bla beinhaltet einige, wichtige Matrixoperationen der linearen Algebra wie etwa Addition, Multiplikation oder Transposition.</p>
+<p>Die <code class="docutils literal notranslate"><span class="pre">Matrix</span></code>-Klasse von ASC-bla beinhaltet einige wichtige Matrixoperationen der linearen Algebra wie etwa Addition, Matrix-Vektor-Multiplikation, Matrixmultiplikation oder Transposition.</p>
 <section id="beispiel">
 <h2>Beispiel<a class="headerlink" href="#beispiel" title="Link to this heading">#</a></h2>
 <div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;matrix.hpp&quot;</span>
@@ -406,6 +407,24 @@ document.write(`
 <span class="w">    </span><span class="n">Matrix</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">B</span><span class="p">;</span>
 <span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Matrix C = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
 <span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="matrix-vektor-multiplikation">
+<h2>Matrix-Vektor-Multiplikation<a class="headerlink" href="#matrix-vektor-multiplikation" title="Link to this heading">#</a></h2>
+<p>Um Matrizen mit Vektoren einer passenden Länge multiplizieren zu können, überladen wir den Operator <code class="docutils literal notranslate"><span class="pre">*</span></code> mit den passenden Inputs wiefolgt:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="p">,</span><span class="w"> </span><span class="n">ORDERING</span><span class="w"> </span><span class="n">ORD</span><span class="p">,</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">VecT</span><span class="o">&gt;</span>
+
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="k">operator</span><span class="o">*</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">Matrix</span><span class="o">&lt;</span><span class="n">T</span><span class="p">,</span><span class="n">ORD</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">A</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Vector</span><span class="o">&lt;</span><span class="n">VecT</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">assert</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">A</span><span class="p">.</span><span class="n">Width</span><span class="p">());</span>
+<span class="w">        </span><span class="n">Vector</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">T</span><span class="p">{}</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">VecT</span><span class="p">{})</span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">(</span><span class="n">A</span><span class="p">.</span><span class="n">Height</span><span class="p">(),</span><span class="w"> </span><span class="k">decltype</span><span class="p">(</span><span class="n">T</span><span class="p">{}</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">VecT</span><span class="p">{}){});</span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">A</span><span class="p">.</span><span class="n">Height</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">j</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">A</span><span class="p">.</span><span class="n">Width</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">j</span><span class="p">)</span>
+<span class="w">                </span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">A</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">j</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
 </pre></div>
 </div>
 </section>
@@ -467,6 +486,7 @@ document.write(`
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#beispiel">Beispiel</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#matrix-vektor-multiplikation">Matrix-Vektor-Multiplikation</a></li>
 </ul>
   </nav></div>
 
