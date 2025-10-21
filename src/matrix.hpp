@@ -10,7 +10,7 @@ namespace ASC_bla
 {
     enum ORDERING { RowMajor, ColMajor };
     template <typename T, ORDERING ORD = RowMajor, typename TDIST = std::integral_constant<size_t,1>>
-    class MatrixView: public MatrixExpr<MatrixView<T,TDIST>> 
+    class MatrixView: public MatrixExpr<MatrixView<T, ORD, TDIST>> 
     {
         protected:
         size_t m_width;
@@ -77,7 +77,7 @@ namespace ASC_bla
         auto dist() const {return m_dist; }
 
         T & operator() (size_t i, size_t j){
-            if(ORD == ColMajor) 
+            if constexpr(ORD == ColMajor) 
                 return m_data[i + j*m_dist];
             else 
                 return m_data[i*m_dist + j];
@@ -88,12 +88,28 @@ namespace ASC_bla
                 return VectorView<T>(m_width, m_data + i * m_width);
             }
             else {
-                return VectorView<T>(m_width, )
+                return VectorView<T>(m_width, m_data + i * m_height);
             }
         }
     };
+
+    template <typename A, typename B>
+    auto operator+(const MatrixExpr<A>& a, const MatrixExpr<B>& b) {
+        return MatrixAddExpr(a.derived(), b.derived());
+    }
+
+    template <typename A, typename B>
+    auto operator*(const MatrixExpr<A>& a, const MatrixExpr<B>& b) {
+        return MatrixMulExpr(a.derived(), b.derived());
+    }
+
+    template<typename Mat, typename Vec>
+    auto operator*(const MatrixExpr<Mat>& a, VecExpr<Vec>& x) {
+        return MatVecExpr(a.derived(), x.derived());
+    }
+
     template <typename T, ORDERING ORD = RowMajor>
-    class Matrix
+    class Matrix : public MatrixView<T,ORD>
     {
         size_t width;
         size_t height;
