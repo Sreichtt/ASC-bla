@@ -85,13 +85,46 @@ namespace ASC_bla
 
         constexpr auto row(size_t i) {
             if constexpr(ORD == RowMajor){
-                return VectorView<T>(m_width, m_data + i * m_width);
+                return VectorView<T>(m_width, m_data + i * m_width); //default-stride 1, Start bei i-ter Zeile
             }
             else {
+                return VectorView<T>(m_width, m_dist, m_data + i); //m_dist = m_height für ColMajor, Start an Stelle i
+            }
+        }
+
+        constexpr auto col(size_t j) {
+            if constexpr(ORD == ColMajor){
+                return VectorView<T>(m_height, m_data + j * m_height);
+            }
+            else {
+                return VectorView<T>(m_heigth, m_dist, m_data + j); // m_dist = m_width
+            }
+        }
+
+        constexpr auto rows(size_t first, size_t next) {
+            if constexpr(ORD == RowMajor){
+                return MatrixView<T, ORD, TDIST>(next - first, m_width, m_dist, m_data + first * m_width)
+            } 
+            else {
+                return MatrixView<T, ORD, TDIST>(next - first, m_width, m_dist, m_data + first);
+            }
+        }
+
+        constexpr auto cols(size_t first, size_t next) {
+            if constexpr (ORD == ColMajor) {
+                return MatrixView<T, ORD, TDIST>(m_height, next - first, m_dist, m_data + first * m_height); //m_dist von Obermatrix übernommen
+            }
+            else {
+                return MatrixView<T, ORD, TDIST>(m_height, next - first, m_dist, m_data + first);
                 return VectorView<T>(m_width, m_data + i * m_height);
             }
         }
-    };
+
+    }
+
+
+
+};
 
     template <typename A, typename B>
     auto operator+(const MatrixExpr<A>& a, const MatrixExpr<B>& b) {
