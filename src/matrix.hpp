@@ -97,13 +97,13 @@ namespace ASC_bla
                 return VectorView<T>(m_height, m_data + j * m_height);
             }
             else {
-                return VectorView<T>(m_heigth, m_dist, m_data + j); // m_dist = m_width
+                return VectorView<T>(m_height, m_dist, m_data + j); // m_dist = m_width
             }
         }
 
         constexpr auto rows(size_t first, size_t next) {
             if constexpr(ORD == RowMajor){
-                return MatrixView<T, ORD, TDIST>(next - first, m_width, m_dist, m_data + first * m_width)
+                return MatrixView<T, ORD, TDIST>(next - first, m_width, m_dist, m_data + first * m_width);
             } 
             else {
                 return MatrixView<T, ORD, TDIST>(next - first, m_width, m_dist, m_data + first);
@@ -120,11 +120,17 @@ namespace ASC_bla
             }
         }
 
-    }
+        auto transpose() const {
+            if constexpr (ORD == RowMajor){
+                return MatrixView<T, ColMajor, TDIST>(m_width, m_height, m_dist, m_data); //m_width und m_height im Konstruktor vertauscht
+            }
+            else{
+                return MatrixView<T, RowMajor, TDIST>(m_width, m_height, m_dist, m_data);
+            }
+        }
 
+    };
 
-
-};
 
     template <typename A, typename B>
     auto operator+(const MatrixExpr<A>& a, const MatrixExpr<B>& b) {
@@ -211,7 +217,58 @@ namespace ASC_bla
                 }
             }
 
+            Matrix<T, ORD> inverse() const;
+
     };
+
+
+    template <typename T, ORDERING ORD>
+    Matrix<T, ORD> Matrix<T, ORD>::inverse() const {
+        assert(height == width);
+
+        size_t n = height;
+
+        Matrix<T, ORD> A(*this);                        
+        Matrix<T, ORD> I(n, n);                         
+        for (size_t i = 0; i < n; ++i){
+            I(i,i) = 1;
+        }
+
+        for (size_t j = 0; j < n; ++j) {
+            size_t pivot_row = j;
+            auto col_j = A.col(j);
+            while (pivot_row < n && col_j(pivot_row) == 0)      
+                ++pivot_row;
+
+            assert(pivot_row != n);
+
+            if (pivot_row != j) {                                
+                for (size_t k = 0; k < n; ++k) {
+                    std::swap(A(j,k), A(pivot_row,k));
+                    std::swap(I(j,k), I(pivot_row,k));
+                }
+            }
+
+            T pivot_val = A(j,j);
+            for (size_t k = 0; k < n; ++k) {
+                A(j,k) /= pivot_val;
+                I(j,k) /= pivot_val;
+            }
+
+            for (size_t i = 0; i < n; ++i) {                     
+                if (i == j) continue;
+                T factor = A(i,j);
+                for (size_t k = 0; k < n; ++k) {
+                    A(i,k) -= factor * A(j,k);                  
+                    I(i,k) -= factor * I(j,k);
+                }
+            }
+        }
+
+        return I; 
+    }
+
+
 
     template <typename T, ORDERING ORD>
     Matrix<T, ORD> operator+(const Matrix<T, ORD>& a, const Matrix<T, ORD>& b)
