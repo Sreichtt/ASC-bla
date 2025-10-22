@@ -150,9 +150,10 @@ namespace ASC_bla
     template <typename T, ORDERING ORD = RowMajor>
     class Matrix : public MatrixView<T,ORD>
     {
-        size_t width;
-        size_t height;
-        T * data;
+        typedef MatrixView<T, ORD> BASE;
+        using BASE::width;
+        using BASE::height;
+        using BASE::data;
 
         size_t index(size_t i, size_t j) const
         {
