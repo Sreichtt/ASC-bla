@@ -1,3 +1,4 @@
+
 build
 _build
 
@@ -19,3 +20,11 @@ __pycache__/
 # OS-Dateien
 .DS_Store
 Thumbs.db
+
+build
+_build
+
+# from python package
+_skbuild
+ASCsoft.egg-info
+
