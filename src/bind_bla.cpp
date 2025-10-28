@@ -100,5 +100,16 @@ PYBIND11_MODULE(bla, m) {
             [](Matrix<double, RowMajor> & mat, Vector<double> & vec){
               return Vector<double>(mat * vec);
             })
+        .def_buffer([](Matrix<double, RowMajor> & m) -> py::buffer_info{
+          return py::buffer_info(
+            m.data(),
+            sizeof(double),
+            py::format_descriptor<double>::format(),
+            2,
+            {m.height(), m.width()},
+            {sizeof(double)*m.width(),
+            sizeof(double)}
+          );
+        })
     ;
 }
