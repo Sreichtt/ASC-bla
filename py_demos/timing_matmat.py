@@ -1,4 +1,5 @@
-from ngsolve import *
+# from ngsolve import *
+from bla import *
 from time import time
 
 n = 1
@@ -13,7 +14,7 @@ while n <= 1024:
 
     ts = time()
     for i in range(runs):
-        C = A*B
+        C = A@B
     te = time()
     print ('n = ', n, ' time = ', (te-ts)/runs)
     data.append( (n, (te-ts)/runs) )
