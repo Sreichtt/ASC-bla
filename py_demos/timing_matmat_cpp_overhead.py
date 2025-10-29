@@ -1,6 +1,6 @@
 import time
 import sys
-sys.path.append('/mnt/c/Users/jonas/Documents/Studium/Bachelor Technische Mathematik/Einführung in Scientific Computing/ASC-bla/ASC-bla_old/build')
+#sys.path.append('/mnt/c/Users/jonas/Documents/Studium/Bachelor Technische Mathematik/Einführung in Scientific Computing/ASC-bla/ASC-bla_old/build')
 from bla import Matrix
 import matplotlib.pyplot as plt
 
