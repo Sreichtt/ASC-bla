@@ -11,8 +11,8 @@ namespace ASC_bla
     class MatrixExpr {
         public:
         auto derived() const {return static_cast<const T&> (*this);}
-        size_t height() const {return derived().Height();}
-        size_t width() const {return derived().Width();}
+        size_t height() const {return derived().height();}
+        size_t width() const {return derived().width();}
         auto operator() (size_t i, size_t j) const {return derived()(i,j);}
     };
 
@@ -32,7 +32,7 @@ namespace ASC_bla
     };
 
     template <typename A, typename B>
-    class MatrixMulExpr : public<MatrixMulExpr<A,B>>
+    class MatrixMulExpr : public MatrixExpr<MatrixMulExpr<A,B>, RowMajor>
     {
         A a;
         B b;
@@ -78,10 +78,25 @@ namespace ASC_bla
                 using TSUM = decltype(std::declval<elemA>() * std::declval<elemB>());
 
                 TSUM sum = 0;
-                for(size_t k = 0; k < a.width(), k++){
+                for(size_t k = 0; k < a.width(); k++){
                     sum += a(i,k) * x(k);
                 }
                 return sum;
             }
+    };
+
+    template <typename T>
+    std::ostream& operator<<(std::ostream& os, const MatrixExpr<T>& expr)
+    {
+        for (size_t i = 0; i < expr.height(); ++i) {
+            for (size_t j = 0; j < expr.width(); ++j) {
+                os << expr(i,j);
+                if (j+1 < expr.width()) os << ", ";
+            }
+            os << '\n';
+        }
+        return os;
     }
 }
+
+#endif
