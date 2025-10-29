@@ -59,7 +59,7 @@ PYBIND11_MODULE(bla, m) {
           std::memcpy(&v(0), PYBIND11_BYTES_AS_STRING(mem.ptr()), v.size()*sizeof(double));
           return v;
         }))
-    ;
+      ;
 
     py::class_<Matrix<double, RowMajor>>(m, "Matrix")
     .def(py::init<size_t, size_t>(),
@@ -141,3 +141,4 @@ PYBIND11_MODULE(bla, m) {
         {sizeof(double)*m.Width(), sizeof(double)}
       );
     });
+}
