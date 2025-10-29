@@ -94,6 +94,16 @@ PYBIND11_MODULE(bla, m) {
             [](Matrix<double, RowMajor> & self, Matrix<double, RowMajor> & other){
               return Matrix<double, RowMajor>(self * other);
             })
+        .def("matmul_with_time", 
+          [](Matrix<double, RowMajor>& self, Matrix<double, RowMajor>& other) {
+            auto t0 = std::chrono::high_resolution_clock::now();
+            Matrix<double, RowMajor> C = self * other;
+            auto t1 = std::chrono::high_resolution_clock::now();
+            double cpp_time = std::chrono::duration<double>(t1 - t0).count();
+            return py::make_tuple(C, cpp_time);
+          },
+        )
+
         .def("__MatVecmul__",
             [](Matrix<double, RowMajor> & mat, Vector<double> & vec){
               return Vector<double>(mat * vec);
