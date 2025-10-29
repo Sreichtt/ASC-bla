@@ -8,7 +8,7 @@
 
 namespace ASC_bla
 {
-    enum ORDERING { RowMajor, ColMajor };
+    //enum ORDERING { RowMajor, ColMajor };
     template <typename T, ORDERING ORD = RowMajor, typename TDIST = std::integral_constant<size_t,1>>
     class MatrixView: public MatrixExpr<MatrixView<T, ORD, TDIST>> 
     {
@@ -22,13 +22,13 @@ namespace ASC_bla
         MatrixView() = default;
         MatrixView(const MatrixView&) = default;
 
-        template <typename TDIST2>
-        MatrixView (const MatrixView<T,TDIST2> & m2)
+        template <ORDERING ORD2, typename TDIST2>
+        MatrixView (const MatrixView<T, ORD2, TDIST2> & m2)
             : m_data(m2.data()), m_width(m2.width()), m_height(m2.height()), m_dist(m2.dist()) { }
 
         MatrixView (size_t height, size_t width, T* data)
             : m_data(data), m_height(height), m_width(width) { }
-        
+
         MatrixView (size_t height, size_t width, TDIST dist, T* data)
             : m_data(data), m_height(height), m_width(width), m_dist(dist) { }
 
@@ -83,6 +83,13 @@ namespace ASC_bla
                 return m_data[i*m_dist + j];
         }
 
+        const T & operator() (size_t i, size_t j) const {
+            if constexpr(ORD == ColMajor)
+                return m_data[i + j*TDIST::value];
+            else
+                return m_data[i*TDIST::value + j];
+        }
+
         constexpr auto row(size_t i) {
             if constexpr(ORD == RowMajor){
                 return VectorView<T>(m_width, m_data + i * m_width); //default-stride 1, Start bei i-ter Zeile
@@ -116,7 +123,7 @@ namespace ASC_bla
             }
             else {
                 return MatrixView<T, ORD, TDIST>(m_height, next - first, m_dist, m_data + first);
-                return VectorView<T>(m_width, m_data + i * m_height);
+                //return VectorView<T>(m_width, m_data + i * m_height);
             }
         }
 
@@ -151,70 +158,75 @@ namespace ASC_bla
     class Matrix : public MatrixView<T,ORD>
     {
         typedef MatrixView<T, ORD> BASE;
-        using BASE::width;
-        using BASE::height;
-        using BASE::data;
+        using BASE::m_width;
+        using BASE::m_height;
+        using BASE::m_data;
 
         size_t index(size_t i, size_t j) const
         {
             if(ORD == RowMajor)
             {
-                return i*width + j;
+                return i*m_width + j;
             } else
             {
-                return j*height + i;
+                return j*m_height + i;
             }
         }
 
         public: 
-            Matrix (size_t _height = 0, size_t _width = 0)
-                : height(_height), width(_width), data(new T[height*width]) { ; }
+            //Matrix (size_t _height = 0, size_t _width = 0)
+                //: m_height(_height), m_width(_width), m_data(new T[_height*_width]) { ; }
+
+            Matrix(size_t _height = 0, size_t _width = 0)
+                : BASE(_height, _width, new T[_height*_width]) { }
 
             Matrix(const Matrix& m)
-                : Matrix(m.height, m.width)
+                : Matrix(m.m_height, m.m_width)
                 {
-                    for (size_t i = 0; i < height * width; ++i)
-                        data[i] = m.data[i];
+                    for (size_t i = 0; i < m_height * m_width; ++i)
+                        m_data[i] = m.m_data[i];
                 }
 
+            //Matrix(Matrix && m)
+                //: m_width(0), m_height(0), m_data(nullptr)
             Matrix(Matrix && m)
-                : width(0), height(0), data(nullptr)
+                : BASE(0, 0, nullptr) 
             {
-                std::swap(width, m.width);
-                std::swap(height, m.height);
-                std::swap(data, m.data);
+                std::swap(m_width, m.m_width);
+                std::swap(m_height, m.m_height);
+                std::swap(m_data, m.m_data);
             }
 
-            ~Matrix () {delete [] data; }
+            ~Matrix () {delete [] m_data; }
 
             Matrix & operator=(const Matrix & m2)
             {
-                for (size_t i = 0; i < width * height; i++)
-                data[i] = m2.data[i];
+                for (size_t i = 0; i < m_width * m_height; i++)
+                m_data[i] = m2.m_data[i];
                 return *this;
             }
 
             Matrix & operator= (Matrix && m2)
             {
-                assert(width == m2.width);
-                assert(height == m2.height);
-                std::swap(width, m2.width);
-                std::swap(height, m2.height);
-                std::swap(data, m2.data);
+                assert(m_width == m2.m_width);
+                assert(m_height == m2.m_height);
+                std::swap(m_width, m2.m_width);
+                std::swap(m_height, m2.m_height);
+                std::swap(m_data, m2.m_data);
                 return *this;
             }
             
-            size_t Width() const {return width;}
-            size_t Height() const {return height;}            
-            T& operator()(size_t i, size_t j) {return data[index(i,j)];}
-            const T& operator()(size_t i, size_t j) const {return data[index(i,j)];}
+            size_t Width() const {return m_width;}
+            size_t Height() const {return m_height;}            
+            T& operator()(size_t i, size_t j) {return m_data[index(i,j)];}
+            const T& operator()(size_t i, size_t j) const {return m_data[index(i,j)];}
 
             void setT(size_t i, size_t j, T d){
                 if (ORD == RowMajor){
-                    data[i* width + j] = d;
+                    m_data[i * m_width + j] = d;
                 }
                 else{
-                    data[j*height + i] = d; 
+                    m_data[j * m_height + i] = d; 
                 }
             }
 
@@ -225,9 +237,9 @@ namespace ASC_bla
 
     template <typename T, ORDERING ORD>
     Matrix<T, ORD> Matrix<T, ORD>::inverse() const {
-        assert(height == width);
+        assert(m_height == m_width);
 
-        size_t n = height;
+        size_t n = m_height;
 
         Matrix<T, ORD> A(*this);                        
         Matrix<T, ORD> I(n, n);                         
@@ -301,7 +313,7 @@ namespace ASC_bla
 
     template <typename T, ORDERING ORD, typename VecT>
     auto operator*(const Matrix<T,ORD>& A, const Vector<VecT>& x) {
-        assert(x.Size() == A.Width());
+        assert(x.size() == A.Width());
         Vector<decltype(T{} * VecT{})> y(A.Height());
 
         for (size_t i = 0; i < A.Height(); ++i)
