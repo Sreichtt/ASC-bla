@@ -5,7 +5,9 @@ import sys
 # from bla import Vector
 
 # import from the installed ASCsoft package:
-from ASCsoft.bla import Vector
+import sys
+sys.path.append("D:\\Users\\screic\\Documents\\Studium\\scicomp\\ASC-bla\\ASC-bla\\build\\Release")
+from bla import Vector
 
 x = Vector(3)
 y = Vector(3)
