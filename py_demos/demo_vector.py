@@ -6,6 +6,7 @@ import sys
 
 # import from the installed ASCsoft package:
 import sys
+sys.path.append('/mnt/c/Users/jonas/Documents/Studium/Bachelor Technische Mathematik/Einführung in Scientific Computing/ASC-bla/ASC-bla_old/build')
 sys.path.append("D:\\Users\\screic\\Documents\\Studium\\scicomp\\ASC-bla\\ASC-bla\\build\\Release")
 from bla import Vector
 
