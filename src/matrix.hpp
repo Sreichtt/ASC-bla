@@ -197,6 +197,14 @@ namespace ASC_bla
                 std::swap(m_data, m.m_data);
             }
 
+
+             template <typename TB>
+              Matrix (const MatrixExpr<TB> & m)
+      : Matrix(m.height(), m.width())
+    {
+      *this = m;
+    }
+
             ~Matrix () {delete [] m_data; }
 
             Matrix & operator=(const Matrix & m2)
