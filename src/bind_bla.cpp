@@ -64,41 +64,90 @@ PYBIND11_MODULE(bla, m) {
     ;
 
     py::class_<Matrix<double, RowMajor>>(m, "Matrix")
-        .def(py::init<size_t, size_t>(),
-            py::arg("height, width"), "create a matrix of given height and width")
-        .def("__height__", &Matrix<double, RowMajor>::height,
+        .def(py::init<size_t, size_t>(), py::arg("height"), py::arg("width"), 
+            "create a matrix of given height and width")
+
+        .def("__height__", &Matrix<double, RowMajor>::Height,
             "return height of matrix")
-        .def("__width__", &Matrix<double, RowMajor>::width,
+
+        .def("__width__", &Matrix<double, RowMajor>::Width,
             "return width of matrix")
+
         .def("__setitem__", [](Matrix<double, RowMajor> & self, std::tuple<int, int> ind, double v){
           i = std::get<0>(ind);
           j = std::get<1>(ind);
-          if(i<0) i += self.height();
-          if(j<0) j += self.width();
-          if(i<0 || i >= self.height()) throw py::error("Matrix row index out of range");
-          if(j<0 || j >= self.width()) throw py::error("Matrix col index out of range");
+          if(i<0) i += self.Height();
+          if(j<0) j += self.Width();
+          if(i<0 || i >= self.Height()) throw py::error("Matrix row index out of range");
+          if(j<0 || j >= self.Width()) throw py::error("Matrix col index out of range");
           self(i,j) = v;
         })
+
         .def("__getitem__",
            [](Matrix<double, RowMajor> self, std::tuple<int, int> ind) {
                return self(std::get<0>(ind), std::get<1>(ind));
            })
+
         .def_property_readonly("shape",
            [](const Matrix<double, RowMajor>& self) {
-               return std::tuple(self.height(), self.width());
+               return std::make_tuple(self.Height(), self.Width());
            })
 
         .def("__add__", 
             [](Matrix<double, RowMajor> & self, Matrix<double, RowMajor> & other){
               return Matrix<double, RowMajor>(self + other);
             })
-        .def("__MatMatmul__",
+
+        .def("__matmatmul__",
             [](Matrix<double, RowMajor> & self, Matrix<double, RowMajor> & other){
               return Matrix<double, RowMajor>(self * other);
             })
-        .def("__MatVecmul__",
+
+        .def("__matvecmul__",
             [](Matrix<double, RowMajor> & mat, Vector<double> & vec){
               return Vector<double>(mat * vec);
             })
+
+        .def("inverse",
+            [](Matrix<double, RowMajor> & self){
+              return Matrix<double, RowMajor>(self.inverse());
+            })
+
+        .def("__str__", 
+            [](matrix<double, RowMajor> & self){
+              std::stringsream str;
+              str << self; 
+              return str.str();
+            })
+        
+        .def(py::pickle(
+            [](Matrix<double, RowMajor> & self){
+              return py::make_tuple(self.Height(), self.Width(), py::bytes((char*)(void*)&self(0,0), self.Height() * self.Width() * sizeof(double)));
+            }; 
+            [](py::tuple t) {
+              if(t.size() != 3)
+                throw std::runtime_error("should be a 3-tuple (height, width, data)");
+              size_t h = t[0].cast<size_t>();
+              size_t w = t[1].cast<size_t>();
+              Matrix<double, RowMajor> m(h,w); 
+              
+              py::bytes mem = t[2].cast<py::bytes>();
+              std::memcpy(&m(0,0), PYBIND11_BYTES_AS_STRING(mem.ptr.()), h * w * sizeof(double));
+              return m; 
+            }
+        ))
+
+        .def_buffer([](Matrix<double, RowMajor> & m) -> py::buffer_info{
+          return py::buffer_info(
+            m.data(),
+            sizeof(double),
+            py::format_descriptor<double>::format(),
+            2,
+            {m.height(), m.width()},
+            {sizeof(double)*m.width(),
+            sizeof(double)}
+          );
+        })
+
     ;
 }
